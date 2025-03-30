@@ -134,7 +134,6 @@ export function TimeHistory({
                           <Button
                             size="sm"
                             variant="destructive"
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
                             onClick={() => handleDeleteClick(entry)}
                             disabled={isDeleting}
                           >
