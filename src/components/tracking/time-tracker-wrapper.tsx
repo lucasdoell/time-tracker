@@ -8,6 +8,11 @@ import { TimeHistory } from "./history";
 
 export function TimeTrackerWrapper() {
   const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([]);
+  const [currentTemplate, setCurrentTemplate] = useState<{
+    activity: string;
+    description?: string;
+    tags: string[];
+  } | null>(null);
 
   const handleSaveTimeEntry = (data: {
     activity: string;
@@ -31,14 +36,26 @@ export function TimeTrackerWrapper() {
     }
   };
 
+  function handleStartAgain(entry: TimeEntry) {
+    setCurrentTemplate({
+      activity: entry.activity,
+      description: entry.description,
+      tags: [...entry.tags],
+    });
+  }
+
   return (
     <div className="w-full max-w-7xl mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <TimeTracker onSave={handleSaveTimeEntry} />
+          <TimeTracker
+            onSave={handleSaveTimeEntry}
+            initialValues={currentTemplate}
+            onSessionStart={() => setCurrentTemplate(null)} // Clear template after starting
+          />
         </div>
         <div>
-          <TimeHistory entries={timeEntries} />
+          <TimeHistory entries={timeEntries} onStartAgain={handleStartAgain} />
         </div>
       </div>
     </div>

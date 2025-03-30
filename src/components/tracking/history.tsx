@@ -1,16 +1,19 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatTime, TimeEntry } from "@/lib/tracking";
 import { formatDistance } from "date-fns";
+import { PlayIcon } from "lucide-react";
 
-interface HistoryProps {
+type HistoryProps = {
   entries: TimeEntry[];
-}
+  onStartAgain?: (entry: TimeEntry) => void;
+};
 
-export function TimeHistory({ entries }: HistoryProps) {
+export function TimeHistory({ entries, onStartAgain }: HistoryProps) {
   return (
     <Card className="w-full h-full">
       <CardHeader>
@@ -59,6 +62,18 @@ export function TimeHistory({ entries }: HistoryProps) {
                       ))}
                     </div>
                   )}
+
+                  <div className="mt-3">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
+                      onClick={() => onStartAgain && onStartAgain(entry)}
+                    >
+                      <PlayIcon className="h-3.5 w-3.5 mr-1.5" />
+                      Start Again
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>

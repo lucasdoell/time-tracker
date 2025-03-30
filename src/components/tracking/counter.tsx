@@ -20,15 +20,34 @@ type TimeTrackerProps = {
     description?: string;
     tags: string[];
   }) => void;
+  initialValues?: {
+    activity: string;
+    description?: string;
+    tags: string[];
+  } | null;
+  onSessionStart?: () => void;
 };
 
-export function TimeTracker({ onSave }: TimeTrackerProps) {
+export function TimeTracker({
+  onSave,
+  initialValues = null,
+  onSessionStart,
+}: TimeTrackerProps) {
   const [isRunning, setIsRunning] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [activity, setActivity] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
+
+  // Apply initialValues when they change
+  useEffect(() => {
+    if (initialValues && !isRunning) {
+      setActivity(initialValues.activity);
+      setDescription(initialValues.description || "");
+      setTags(initialValues.tags);
+    }
+  }, [initialValues, isRunning]);
 
   // Handle timer
   useEffect(() => {
@@ -49,6 +68,9 @@ export function TimeTracker({ onSave }: TimeTrackerProps) {
       return;
     }
     setIsRunning(true);
+    if (onSessionStart) {
+      onSessionStart();
+    }
   }
 
   function handlePause() {
