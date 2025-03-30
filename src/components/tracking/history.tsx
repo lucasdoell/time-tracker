@@ -4,9 +4,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { deleteTimeEntry } from "@/lib/tauri-api";
 import { formatTime, TimeEntry } from "@/lib/tracking";
 import { formatDistance } from "date-fns";
-import { EditIcon, PlayIcon } from "lucide-react";
+import { EditIcon, PlayIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { EditTimeEntry } from "./edit-time-entry";
 
@@ -23,10 +29,27 @@ export function TimeHistory({
 }: HistoryProps) {
   const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleEditClick = (entry: TimeEntry) => {
     setEditingEntry(entry);
     setIsEditDialogOpen(true);
+  };
+
+  const handleDeleteClick = async (entry: TimeEntry) => {
+    if (isDeleting) return;
+
+    try {
+      setIsDeleting(true);
+      await deleteTimeEntry(entry.id);
+      if (onEntryUpdated) {
+        await onEntryUpdated();
+      }
+    } catch (error) {
+      console.error("Failed to delete time entry:", error);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -103,6 +126,23 @@ export function TimeHistory({
                         <EditIcon className="h-3.5 w-3.5 mr-1.5" />
                         Edit
                       </Button>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                            onClick={() => handleDeleteClick(entry)}
+                            disabled={isDeleting}
+                          >
+                            <Trash2Icon className="h-3.5 w-3.5" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Delete entry</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                   </div>
                 ))}
