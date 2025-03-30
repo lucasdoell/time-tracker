@@ -76,8 +76,8 @@ export function TimeTrackerWrapper() {
 
   return (
     <div className="w-full max-w-7xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:min-h-[550px]">
+        <div className="h-full">
           <TimeTracker
             ref={trackerRef}
             onSave={handleSaveTimeEntry}
@@ -85,9 +85,9 @@ export function TimeTrackerWrapper() {
             onSessionStart={() => setCurrentTemplate(null)}
           />
         </div>
-        <div>
+        <div className="h-full">
           {loading ? (
-            <div className="flex items-center justify-center h-32">
+            <div className="flex items-center justify-center h-full">
               <p>Loading time entries...</p>
             </div>
           ) : (

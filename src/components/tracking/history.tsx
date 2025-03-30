@@ -54,18 +54,20 @@ export function TimeHistory({
 
   return (
     <>
-      <Card className="w-full h-full">
+      <Card className="w-full h-full flex flex-col">
         <CardHeader>
           <CardTitle className="text-xl">Recent Time Entries</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-1 overflow-hidden">
           {entries.length === 0 ? (
-            <p className="text-center text-muted-foreground py-4">
-              No time entries recorded yet
-            </p>
+            <div className="flex items-center justify-center h-full">
+              <p className="text-center text-muted-foreground">
+                No time entries recorded yet
+              </p>
+            </div>
           ) : (
-            <ScrollArea className="h-[500px] pr-4">
-              <div className="space-y-4">
+            <ScrollArea className="h-[400px]">
+              <div className="space-y-4 pr-4">
                 {entries.map((entry) => (
                   <div
                     key={entry.id}

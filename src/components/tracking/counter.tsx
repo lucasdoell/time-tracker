@@ -114,7 +114,7 @@ export const TimeTracker = forwardRef<TimeTrackerRef, TimeTrackerProps>(
     }
 
     return (
-      <Card className="w-full">
+      <Card className="w-full h-full flex flex-col">
         <CardHeader className="pb-2">
           <div className="flex flex-col gap-2">
             <Input
