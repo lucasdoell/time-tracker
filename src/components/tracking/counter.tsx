@@ -9,14 +9,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { PauseIcon, PlayIcon, StopCircleIcon } from "lucide-react";
+import { PauseIcon, PlayIcon, Square } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type TimeTrackerProps = {
@@ -31,7 +24,7 @@ type TimeTrackerProps = {
 export function TimeTracker({ onSave }: TimeTrackerProps) {
   const [isRunning, setIsRunning] = useState(false);
   const [elapsed, setElapsed] = useState(0);
-  const [activity, setActivity] = useState("Remote Work");
+  const [activity, setActivity] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
@@ -61,15 +54,20 @@ export function TimeTracker({ onSave }: TimeTrackerProps) {
   }
 
   function handleStart() {
-    return setIsRunning(true);
+    if (!activity.trim()) {
+      // Might want to show an error message here
+      return;
+    }
+    setIsRunning(true);
   }
+
   function handlePause() {
     return setIsRunning(false);
   }
 
   function handleStop() {
     setIsRunning(false);
-    if (onSave) {
+    if (onSave && activity.trim()) {
       onSave({
         activity,
         elapsed,
@@ -77,7 +75,7 @@ export function TimeTracker({ onSave }: TimeTrackerProps) {
         tags,
       });
     }
-    // Reset timer but keep other values for now
+    // Reset timer but keep other values for next session
     setElapsed(0);
   }
 
@@ -93,28 +91,19 @@ export function TimeTracker({ onSave }: TimeTrackerProps) {
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full">
       <CardHeader className="pb-2">
         <div className="flex flex-col gap-2">
-          <Select
+          <Input
+            placeholder="What are you working on?"
             value={activity}
-            onValueChange={setActivity}
+            onChange={(e) => setActivity(e.target.value)}
             disabled={isRunning}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select activity" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Remote Work">Remote Work</SelectItem>
-              <SelectItem value="Meeting">Meeting</SelectItem>
-              <SelectItem value="Development">Development</SelectItem>
-              <SelectItem value="Research">Research</SelectItem>
-              <SelectItem value="Planning">Planning</SelectItem>
-            </SelectContent>
-          </Select>
+            className="font-medium text-lg"
+          />
 
           <Input
-            placeholder="Description (optional)"
+            placeholder="Add details (optional)"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             disabled={isRunning}
@@ -142,6 +131,7 @@ export function TimeTracker({ onSave }: TimeTrackerProps) {
               variant="outline"
               onClick={handleAddTag}
               disabled={isRunning || !newTag.trim()}
+              className="shrink-0"
             >
               Add
             </Button>
@@ -175,6 +165,7 @@ export function TimeTracker({ onSave }: TimeTrackerProps) {
             <Button
               onClick={handleStart}
               className="bg-green-600 hover:bg-green-700 flex-1 mr-2"
+              disabled={!activity.trim()}
             >
               <PlayIcon className="mr-2 h-4 w-4" /> Start
             </Button>
@@ -194,7 +185,7 @@ export function TimeTracker({ onSave }: TimeTrackerProps) {
             disabled={elapsed === 0}
             className="flex-1"
           >
-            <StopCircleIcon className="mr-2 h-4 w-4" /> Stop
+            <Square className="mr-2 h-4 w-4" /> Stop
           </Button>
         </div>
       </CardFooter>

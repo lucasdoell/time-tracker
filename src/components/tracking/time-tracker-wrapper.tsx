@@ -31,9 +31,15 @@ export function TimeTrackerWrapper() {
   };
 
   return (
-    <div className="space-y-4">
-      <TimeTracker onSave={handleSaveTimeEntry} />
-      <TimeHistory entries={timeEntries} />
+    <div className="w-full max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <TimeTracker onSave={handleSaveTimeEntry} />
+        </div>
+        <div>
+          <TimeHistory entries={timeEntries} />
+        </div>
+      </div>
     </div>
   );
 }

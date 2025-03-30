@@ -31,7 +31,7 @@ export function TimeHistory({ entries }: HistoryProps) {
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto mt-4">
+    <Card className="w-full h-full">
       <CardHeader>
         <CardTitle className="text-xl">Recent Time Entries</CardTitle>
       </CardHeader>
@@ -41,7 +41,7 @@ export function TimeHistory({ entries }: HistoryProps) {
             No time entries recorded yet
           </p>
         ) : (
-          <ScrollArea className="h-[300px] pr-4">
+          <ScrollArea className="h-[500px] pr-4">
             <div className="space-y-4">
               {entries.map((entry) => (
                 <div
