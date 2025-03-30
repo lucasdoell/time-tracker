@@ -1,9 +1,9 @@
 "use client";
 
 import { TimeEntry } from "@/lib/tracking";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { TimeTracker } from "./counter";
+import { TimeTracker, TimeTrackerRef } from "./counter";
 import { TimeHistory } from "./history";
 
 export function TimeTrackerWrapper() {
@@ -13,13 +13,15 @@ export function TimeTrackerWrapper() {
     description?: string;
     tags: string[];
   } | null>(null);
+  // Reference to the TimeTracker component to programmatically start tracking
+  const trackerRef = useRef<TimeTrackerRef>(null);
 
-  const handleSaveTimeEntry = (data: {
+  function handleSaveTimeEntry(data: {
     activity: string;
     elapsed: number;
     description?: string;
     tags: string[];
-  }) => {
+  }) {
     // Only save entries that have actual time tracked
     if (data.elapsed > 0) {
       const newEntry: TimeEntry = {
@@ -34,7 +36,7 @@ export function TimeTrackerWrapper() {
       // Add new entry to the beginning of the array
       setTimeEntries((prevEntries) => [newEntry, ...prevEntries]);
     }
-  };
+  }
 
   function handleStartAgain(entry: TimeEntry) {
     setCurrentTemplate({
@@ -42,6 +44,13 @@ export function TimeTrackerWrapper() {
       description: entry.description,
       tags: [...entry.tags],
     });
+
+    setTimeout(() => {
+      // Automatically start tracking after setting the template
+      if (trackerRef.current) {
+        trackerRef.current.startTracking();
+      }
+    }, 0);
   }
 
   return (
@@ -49,9 +58,10 @@ export function TimeTrackerWrapper() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <TimeTracker
+            ref={trackerRef}
             onSave={handleSaveTimeEntry}
             initialValues={currentTemplate}
-            onSessionStart={() => setCurrentTemplate(null)} // Clear template after starting
+            onSessionStart={() => setCurrentTemplate(null)}
           />
         </div>
         <div>
