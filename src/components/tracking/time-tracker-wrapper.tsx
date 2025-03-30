@@ -19,19 +19,20 @@ export function TimeTrackerWrapper() {
 
   // Load existing time entries from database on mount
   useEffect(() => {
-    async function loadTimeEntries() {
-      try {
-        const entries = await getAllTimeEntries();
-        setTimeEntries(entries);
-      } catch (error) {
-        console.error("Failed to load time entries:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     loadTimeEntries();
   }, []);
+
+  async function loadTimeEntries() {
+    try {
+      setLoading(true);
+      const entries = await getAllTimeEntries();
+      setTimeEntries(entries);
+    } catch (error) {
+      console.error("Failed to load time entries:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function handleSaveTimeEntry(data: {
     activity: string;
@@ -51,8 +52,7 @@ export function TimeTrackerWrapper() {
         });
 
         // Refresh time entries from database
-        const updatedEntries = await getAllTimeEntries();
-        setTimeEntries(updatedEntries);
+        await loadTimeEntries();
       } catch (error) {
         console.error("Failed to save time entry:", error);
       }
@@ -94,6 +94,7 @@ export function TimeTrackerWrapper() {
             <TimeHistory
               entries={timeEntries}
               onStartAgain={handleStartAgain}
+              onEntryUpdated={loadTimeEntries}
             />
           )}
         </div>
