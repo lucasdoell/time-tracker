@@ -9,6 +9,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { formatTime } from "@/lib/tracking";
 import { PauseIcon, PlayIcon, Square } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -41,17 +42,6 @@ export function TimeTracker({ onSave }: TimeTrackerProps) {
 
     return () => clearInterval(interval);
   }, [isRunning]);
-
-  // Format time as HH:MM:SS
-  function formatTime(seconds: number): string {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-
-    return [hours, minutes, secs]
-      .map((val) => val.toString().padStart(2, "0"))
-      .join(":");
-  }
 
   function handleStart() {
     if (!activity.trim()) {

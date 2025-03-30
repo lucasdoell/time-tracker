@@ -1,9 +1,10 @@
 "use client";
 
+import { TimeEntry } from "@/lib/tracking";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { TimeTracker } from "./counter";
-import { TimeEntry, TimeHistory } from "./history";
+import { TimeHistory } from "./history";
 
 export function TimeTrackerWrapper() {
   const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([]);
