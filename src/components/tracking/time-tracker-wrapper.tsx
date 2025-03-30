@@ -1,8 +1,8 @@
 "use client";
 
+import { getAllTimeEntries, saveTimeEntry } from "@/lib/tauri-api";
 import { TimeEntry } from "@/lib/tracking";
-import { useRef, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
+import { useEffect, useRef, useState } from "react";
 import { TimeTracker, TimeTrackerRef } from "./counter";
 import { TimeHistory } from "./history";
 
@@ -15,8 +15,25 @@ export function TimeTrackerWrapper() {
   } | null>(null);
   // Reference to the TimeTracker component to programmatically start tracking
   const trackerRef = useRef<TimeTrackerRef>(null);
+  const [loading, setLoading] = useState(true);
 
-  function handleSaveTimeEntry(data: {
+  // Load existing time entries from database on mount
+  useEffect(() => {
+    async function loadTimeEntries() {
+      try {
+        const entries = await getAllTimeEntries();
+        setTimeEntries(entries);
+      } catch (error) {
+        console.error("Failed to load time entries:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadTimeEntries();
+  }, []);
+
+  async function handleSaveTimeEntry(data: {
     activity: string;
     elapsed: number;
     description?: string;
@@ -24,17 +41,21 @@ export function TimeTrackerWrapper() {
   }) {
     // Only save entries that have actual time tracked
     if (data.elapsed > 0) {
-      const newEntry: TimeEntry = {
-        id: uuidv4(),
-        activity: data.activity,
-        elapsed: data.elapsed,
-        description: data.description,
-        tags: data.tags,
-        timestamp: new Date(),
-      };
+      try {
+        // Save entry to database
+        await saveTimeEntry({
+          activity: data.activity,
+          elapsed: data.elapsed,
+          description: data.description,
+          tags: data.tags,
+        });
 
-      // Add new entry to the beginning of the array
-      setTimeEntries((prevEntries) => [newEntry, ...prevEntries]);
+        // Refresh time entries from database
+        const updatedEntries = await getAllTimeEntries();
+        setTimeEntries(updatedEntries);
+      } catch (error) {
+        console.error("Failed to save time entry:", error);
+      }
     }
   }
 
@@ -65,7 +86,16 @@ export function TimeTrackerWrapper() {
           />
         </div>
         <div>
-          <TimeHistory entries={timeEntries} onStartAgain={handleStartAgain} />
+          {loading ? (
+            <div className="flex items-center justify-center h-32">
+              <p>Loading time entries...</p>
+            </div>
+          ) : (
+            <TimeHistory
+              entries={timeEntries}
+              onStartAgain={handleStartAgain}
+            />
+          )}
         </div>
       </div>
     </div>
