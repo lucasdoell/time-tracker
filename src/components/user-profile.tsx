@@ -12,6 +12,7 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { UserCircle } from "lucide-react";
 import { useEffect, useState } from "react";
+import { AuthForm } from "./auth-form";
 
 type AuthSession = {
   user: {
@@ -52,29 +53,6 @@ export function UserProfile() {
     checkSession();
   }, []);
 
-  async function handleSignIn() {
-    try {
-      await authClient.signIn.email({
-        email: "user@example.com",
-        password: "password123",
-      });
-    } catch (error) {
-      console.error("Error signing in:", error);
-    }
-  }
-
-  async function handleSignUp() {
-    try {
-      await authClient.signUp.email({
-        email: "user@example.com",
-        password: "password123",
-        name: "User Name",
-      });
-    } catch (error) {
-      console.error("Error signing up:", error);
-    }
-  }
-
   async function handleSignOut() {
     try {
       await authClient.signOut();
@@ -93,11 +71,7 @@ export function UserProfile() {
           className="relative h-8 w-8 rounded-full"
           aria-label="User profile"
         >
-          {session ? (
-            <UserCircle className="h-8 w-8" />
-          ) : (
-            <UserCircle className="h-8 w-8" />
-          )}
+          <UserCircle className="h-8 w-8" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
@@ -132,18 +106,7 @@ export function UserProfile() {
               </Button>
             </div>
           ) : (
-            <div className="space-y-4">
-              <Button onClick={handleSignIn} className="w-full">
-                Sign in
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleSignUp}
-                className="w-full"
-              >
-                Create account
-              </Button>
-            </div>
+            <AuthForm />
           )}
         </div>
       </DialogContent>
