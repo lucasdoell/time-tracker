@@ -10,34 +10,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { authClient } from "@/lib/auth-client";
+import { AuthSession } from "@/types/auth";
 import { UserCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AuthForm } from "./auth-form";
 
-type AuthSession = {
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    emailVerified: boolean;
-    createdAt: Date;
-    updatedAt: Date;
-    image?: string | null;
-  };
-  session: {
-    id: string;
-    createdAt: Date;
-    updatedAt: Date;
-    userId: string;
-    expiresAt: Date;
-    token: string;
-    ipAddress?: string | null;
-    userAgent?: string | null;
-  };
-};
-
 export function UserProfile() {
   const [session, setSession] = useState<AuthSession | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     async function checkSession() {
@@ -57,6 +38,7 @@ export function UserProfile() {
     try {
       await authClient.signOut();
       setSession(null);
+      router.refresh();
     } catch (error) {
       console.error("Error signing out:", error);
     }
@@ -106,7 +88,7 @@ export function UserProfile() {
               </Button>
             </div>
           ) : (
-            <AuthForm />
+            <AuthForm onSessionUpdate={setSession} />
           )}
         </div>
       </DialogContent>

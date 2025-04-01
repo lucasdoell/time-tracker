@@ -12,7 +12,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { authClient } from "@/lib/auth-client";
+import { AuthSession } from "@/types/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -42,8 +44,13 @@ const signInSchema = z.object({
 type SignUpValues = z.infer<typeof signUpSchema>;
 type SignInValues = z.infer<typeof signInSchema>;
 
-export function AuthForm() {
+type AuthFormProps = {
+  onSessionUpdate?: (session: AuthSession | null) => void;
+};
+
+export function AuthForm({ onSessionUpdate }: AuthFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const signUpForm = useForm<SignUpValues>({
     resolver: zodResolver(signUpSchema),
@@ -65,13 +72,29 @@ export function AuthForm() {
   async function onSignUp(values: SignUpValues) {
     try {
       setIsLoading(true);
-      await authClient.signUp.email({
+      const response = await authClient.signUp.email({
         email: values.email,
         password: values.password,
         name: values.name,
       });
-      toast.success("Account created successfully!");
-      signUpForm.reset();
+      if (response && !(response instanceof Error) && response.data) {
+        toast.success("Account created successfully!");
+        signUpForm.reset();
+        // Convert AuthResponse to AuthSession
+        const session: AuthSession = {
+          user: response.data.user,
+          session: {
+            id: response.data.token || "",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            userId: response.data.user.id,
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
+            token: response.data.token || "",
+          },
+        };
+        onSessionUpdate?.(session);
+        router.refresh();
+      }
     } catch (error) {
       console.error("Error signing up:", error);
       toast.error("Failed to create account. Please try again.");
@@ -83,12 +106,28 @@ export function AuthForm() {
   async function onSignIn(values: SignInValues) {
     try {
       setIsLoading(true);
-      await authClient.signIn.email({
+      const response = await authClient.signIn.email({
         email: values.email,
         password: values.password,
       });
-      toast.success("Signed in successfully!");
-      signInForm.reset();
+      if (response && !(response instanceof Error) && response.data) {
+        toast.success("Signed in successfully!");
+        signInForm.reset();
+        // Convert AuthResponse to AuthSession
+        const session: AuthSession = {
+          user: response.data.user,
+          session: {
+            id: response.data.token || "",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            userId: response.data.user.id,
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
+            token: response.data.token || "",
+          },
+        };
+        onSessionUpdate?.(session);
+        router.refresh();
+      }
     } catch (error) {
       console.error("Error signing in:", error);
       toast.error("Failed to sign in. Please check your credentials.");
