@@ -53,6 +53,10 @@ async fn update_time_entry(
         timestamp: chrono::DateTime::parse_from_rfc3339(&timestamp)
             .map(|dt| dt.with_timezone(&chrono::Utc))
             .map_err(|e| e.to_string())?,
+        last_modified: chrono::Utc::now(),
+        synced: false,
+        sync_id: None,
+        user_id: None,
     };
 
     schema::update_time_entry(&state.db_conn, &entry).map_err(|e| e.to_string())
