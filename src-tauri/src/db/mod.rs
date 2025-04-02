@@ -22,10 +22,58 @@ pub fn init_db() -> Result<DbConnection> {
             elapsed INTEGER NOT NULL,
             description TEXT,
             timestamp TEXT NOT NULL,
-            tags TEXT
+            tags TEXT,
+            last_modified TEXT NOT NULL DEFAULT (datetime('now')),
+            synced INTEGER DEFAULT 0,
+            sync_id TEXT,
+            user_id TEXT
         )",
         [],
     )?;
+
+    // Add migration if table already exists
+    let pragma: i32 = conn.query_row(
+        "SELECT count(*) FROM pragma_table_info('time_entries') WHERE name = 'last_modified'",
+        [],
+        |row| row.get(0),
+    )?;
+    if pragma == 0 {
+        conn.execute("ALTER TABLE time_entries ADD COLUMN last_modified TEXT", [])?;
+        conn.execute(
+            "UPDATE time_entries SET last_modified = datetime('now') WHERE last_modified IS NULL",
+            [],
+        )?;
+    }
+
+    let pragma: i32 = conn.query_row(
+        "SELECT count(*) FROM pragma_table_info('time_entries') WHERE name = 'synced'",
+        [],
+        |row| row.get(0),
+    )?;
+    if pragma == 0 {
+        conn.execute(
+            "ALTER TABLE time_entries ADD COLUMN synced INTEGER DEFAULT 0",
+            [],
+        )?;
+    }
+
+    let pragma: i32 = conn.query_row(
+        "SELECT count(*) FROM pragma_table_info('time_entries') WHERE name = 'sync_id'",
+        [],
+        |row| row.get(0),
+    )?;
+    if pragma == 0 {
+        conn.execute("ALTER TABLE time_entries ADD COLUMN sync_id TEXT", [])?;
+    }
+
+    let pragma: i32 = conn.query_row(
+        "SELECT count(*) FROM pragma_table_info('time_entries') WHERE name = 'user_id'",
+        [],
+        |row| row.get(0),
+    )?;
+    if pragma == 0 {
+        conn.execute("ALTER TABLE time_entries ADD COLUMN user_id TEXT", [])?;
+    }
 
     Ok(Arc::new(Mutex::new(conn)))
 }
